@@ -110,6 +110,7 @@ public class FileStorageHelper {
             String message = "Conflict! Both files have been modified.";
             //throw new RuntimeException();
             Timber.e(message);
+            pushDatabase(metadata);
             return;
         }
         if (remoteChanged) {
@@ -141,6 +142,11 @@ public class FileStorageHelper {
 
     private boolean isRemoteFileChanged(DatabaseMetadata metadata) {
         DocFileMetadata remote = getRemoteMetadata(metadata);
+
+        if (remote == null) {
+            Timber.e("Remote file problem.");
+            throw new RuntimeException("Error");
+        }
 
         // Check if the remote file was modified since fetched.
         // This is the modification timestamp of the remote file when it was last downloaded.
@@ -313,7 +319,8 @@ public class FileStorageHelper {
         } catch (Exception e) {
             Timber.e(e);
         } finally {
-            cursor.close();
+            if (cursor != null)
+                cursor.close();
         }
 
         // check the values
